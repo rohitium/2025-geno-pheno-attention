@@ -22,14 +22,14 @@ def extract_30C_r2_from_metrics(metrics_path: Path) -> float:
     df = pd.read_csv(metrics_path)
 
     # Look for 30C-specific R² first
-    test_r2_30C = df[df['metric'] == 'test_r2_30C']
+    test_r2_30C = df[df["metric"] == "test_r2_30C"]
     if not test_r2_30C.empty:
-        return float(test_r2_30C['value'].iloc[0])
+        return float(test_r2_30C["value"].iloc[0])
 
     # Fallback to general test_r2 (for single-phenotype models)
-    test_r2_general = df[df['metric'] == 'test_r2']
+    test_r2_general = df[df["metric"] == "test_r2"]
     if not test_r2_general.empty:
-        return float(test_r2_general['value'].iloc[0])
+        return float(test_r2_general["value"].iloc[0])
 
     return np.nan
 
@@ -39,10 +39,16 @@ def main():
 
     # Define model paths and their display names
     models = {
-        "Original rijal_et_al\n(fig3)": "models/fig3/fig3_30C/lightning_logs/version_0/metrics.csv",
-        "Our rijal_et_al\n(30C_prediction)": "models/30C_prediction/30C_no_cache/lightning_logs/version_0/metrics.csv",
-        "Modified rijal_et_al\n(canonical)": "models/canonical/std_d128_rep_00/lightning_logs/version_0/metrics.csv",
-        "Transformer": "models/transformer/xformer_rep_00/lightning_logs/version_0/metrics.csv",
+        "Original rijal_et_al\n(fig3)": (
+            "models/fig3/fig3_30C/lightning_logs/version_0/metrics.csv"
+        ),
+        "Our rijal_et_al\n(30C_prediction)": (
+            "models/30C_prediction/30C_no_cache/lightning_logs/version_0/metrics.csv"
+        ),
+        "Modified rijal_et_al\n(canonical)": (
+            "models/canonical/std_d128_rep_00/lightning_logs/version_0/metrics.csv"
+        ),
+        "Transformer": ("models/transformer/xformer_rep_00/lightning_logs/version_0/metrics.csv"),
     }
 
     # Extract R² values
@@ -74,47 +80,66 @@ def main():
     plt.figure(figsize=(12, 8))
 
     # Create bar plot with different colors
-    colors = ['#2E86AB', '#A23B72', '#F18F01', '#C73E1D']
-    bars = plt.bar(model_names, r2_values, color=colors[:len(model_names)], alpha=0.8, edgecolor='black')
+    colors = ["#2E86AB", "#A23B72", "#F18F01", "#C73E1D"]
+    bars = plt.bar(
+        model_names, r2_values, color=colors[: len(model_names)], alpha=0.8, edgecolor="black"
+    )
 
     # Add value labels on bars
     for bar, value in zip(bars, r2_values, strict=False):
         height = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2., height + 0.005,
-                f'{value:.4f}', ha='center', va='bottom', fontweight='bold', fontsize=12)
+        plt.text(
+            bar.get_x() + bar.get_width() / 2.0,
+            height + 0.005,
+            f"{value:.4f}",
+            ha="center",
+            va="bottom",
+            fontweight="bold",
+            fontsize=12,
+        )
 
     # Customize plot
-    plt.ylabel('Test R² Score', fontsize=14, fontweight='bold')
-    plt.title('30C Phenotype Test R² Comparison\nAcross Different Model Architectures',
-              fontsize=16, fontweight='bold', pad=20)
+    plt.ylabel("Test R² Score", fontsize=14, fontweight="bold")
+    plt.title(
+        "30C Phenotype Test R² Comparison\nAcross Different Model Architectures",
+        fontsize=16,
+        fontweight="bold",
+        pad=20,
+    )
     plt.ylim(0, max(r2_values) * 1.15)  # Add some headroom for labels
 
     # Add grid for better readability
-    plt.grid(axis='y', alpha=0.3, linestyle='--')
+    plt.grid(axis="y", alpha=0.3, linestyle="--")
 
     # Rotate x-axis labels for better readability
-    plt.xticks(rotation=0, ha='center', fontsize=11)
+    plt.xticks(rotation=0, ha="center", fontsize=11)
     plt.yticks(fontsize=11)
 
     # Add horizontal line at 0.6 for reference
-    plt.axhline(y=0.6, color='red', linestyle='--', alpha=0.7, linewidth=2)
-    plt.text(0.02, 0.605, 'R² = 0.6', transform=plt.gca().get_yaxis_transform(),
-             color='red', fontweight='bold')
+    plt.axhline(y=0.6, color="red", linestyle="--", alpha=0.7, linewidth=2)
+    plt.text(
+        0.02,
+        0.605,
+        "R² = 0.6",
+        transform=plt.gca().get_yaxis_transform(),
+        color="red",
+        fontweight="bold",
+    )
 
     plt.tight_layout()
 
     # Save plot
     output_file = "30C_performance_comparison.png"
-    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.savefig(output_file, dpi=300, bbox_inches="tight")
     print(f"\n📊 Plot saved to: {output_file}")
 
     # Show plot
     plt.show()
 
     # Create summary table
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("30C PHENOTYPE TEST R² COMPARISON SUMMARY")
-    print("="*60)
+    print("=" * 60)
 
     # Sort by R² value (descending)
     sorted_results = sorted(valid_results.items(), key=lambda x: x[1], reverse=True)
@@ -123,7 +148,7 @@ def main():
         rank = i + 1
         print(f"{rank}. {model.replace(chr(10), ' '):<35} R² = {r2:.4f}")
 
-    print("="*60)
+    print("=" * 60)
 
     # Calculate improvements
     if len(sorted_results) >= 2:

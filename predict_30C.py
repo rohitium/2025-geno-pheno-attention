@@ -103,13 +103,11 @@ def main():
                 print(f"Processed batch {batch_idx}/{len(test_loader)}")
 
     # Create results DataFrame
-    results_df = pd.DataFrame({
-        "true_30C": targets,
-        "predicted_30C": predictions
-    })
+    results_df = pd.DataFrame({"true_30C": targets, "predicted_30C": predictions})
 
     # Calculate R² using numpy correlation coefficient
     import numpy as np
+
     correlation_matrix = np.corrcoef(targets, predictions)
     r2 = correlation_matrix[0, 1] ** 2
 
@@ -125,6 +123,7 @@ def main():
     # Display first few predictions
     print("\nFirst 10 predictions:")
     print(results_df.head(10))
+
 
 if __name__ == "__main__":
     main()

@@ -21,9 +21,10 @@ image = (
     .add_local_python_source("analysis")  # Add the analysis package
     .add_local_file(
         "models/transformer/xformer_rep_00/lightning_logs/version_0/checkpoints/best-epoch=021-val_loss=0.3811.ckpt",
-        "/checkpoint.ckpt"
+        "/checkpoint.ckpt",
     )
 )
+
 
 @app.function(
     image=image,
@@ -51,14 +52,12 @@ def run_temperature_prediction():
         embedding_dim=256,
         num_layers=3,
         nhead=4,
-        dim_feedforward=1024
+        dim_feedforward=1024,
     )
     train_config = TrainConfig(phenotypes=phenotype_names)
 
     transformer = Transformer.load_from_checkpoint(
-        str(checkpoint),
-        model_config=model_config,
-        train_config=train_config
+        str(checkpoint), model_config=model_config, train_config=train_config
     )
     transformer.eval()
 
@@ -86,8 +85,9 @@ def run_temperature_prediction():
     arbitrary_temp = 28.5
     results = []
     for i in range(batch_size):
-        interp_func = interp1d(temp_values, temp_predictions[i].numpy(),
-                             kind='cubic', fill_value='extrapolate')
+        interp_func = interp1d(
+            temp_values, temp_predictions[i].numpy(), kind="cubic", fill_value="extrapolate"
+        )
         results.append(interp_func(arbitrary_temp))
 
     results = np.array(results)
@@ -96,11 +96,13 @@ def run_temperature_prediction():
     print("✅ Temperature prediction completed successfully on GPU!")
     return {"batch_size": batch_size, "device": str(device), "temperature": arbitrary_temp}
 
+
 @app.local_entrypoint()
 def main():
     print("🚀 Running temperature prediction on Modal...")
     result = run_temperature_prediction.remote()
     print(f"✅ Modal job completed: {result}")
+
 
 if __name__ == "__main__":
     main()
